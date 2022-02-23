@@ -1,0 +1,147 @@
+---
+layout: 12pt
+output: pdf_document
+bibliography: sagecast.bib
+csl: ecology.csl
+header-includes:
+ \usepackage{float}
+ \floatplacement{figure}{H}
+---
+
+\begin{centering}
+\textbf{\Large{Supporting Information for:\\Dynamic spatiotemporal modeling of a habitat defining plant species to support wildlife management at regional scales}}
+
+\textsc{\small{Andrew T. Tredennick, Thomas Prebyl, Adrian P. Monroe, John Lombardi, and Cameron L. Aldridge}}
+\end{centering}
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, eval = FALSE)
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+```
+
+
+# Potential scale reduction factors
+
+Potential scale reduction factors ($\hat{R}$) help diagnose MCMC convergence.
+MCMC algorithms have reached convergence when $\hat{R} < 1.1$.
+
+```{r rhats, eval = TRUE, results = "asis"}
+rhats <- readRDS("../Output/rhats.RDS")
+cores <- names(rhats)
+for(doCore in cores) {
+   tab <- rhats[[doCore]]$psrf
+   print(knitr::kable(tab, digits = 2, format = "latex", caption = doCore))
+}
+```
+
+\pagebreak
+
+# Posterior distributions
+
+```{r posteriors, eval = TRUE, results = 'asis'}
+mcmcDir <- "../Output/MCMC/"
+subDirs <- list.files(mcmcDir)
+mcmcList <- list()
+
+paramLabs <- c("Intercept", "Dens. dep.", "Precip.", "Temp.", "Temporal var.")
+paramLabs <- factor(paramLabs, levels = paramLabs)
+
+tableLabs <- c("Intercept, $\\beta_{1}$", 
+               "Density dependence, $\\beta_2$", 
+               "Precipitation effect, $\\beta_3$", 
+               "Temperature effect, $\\beta_4$", 
+               "Variance of temporal random effect, $\\sigma_y$")
+# tableLabs <- factor(tableLabs, levels = tableLabs)
+    
+for(doArea in subDirs) {
+   tmp <- readRDS(paste0(mcmcDir, doArea, "/MCMC.RDS"))
+   mcmcList[[doArea]] <- tmp
+   tmpDf <- tmp[, c("Beta[1]", "Beta[2]", "Beta[3]", "Beta[4]", "sigma_y")]
+   colnames(tmpDf) <- paramLabs[1:5]
+   tmpDf <- as_tibble(tmpDf) %>%
+      mutate(iteration = 1:n()) %>%
+      gather(key = "Parameter", value = "value", -iteration) %>%
+      mutate(Parameter = factor(Parameter, levels = paramLabs))
+   
+   p <- ggplot(tmpDf, aes(x = value, y=..density..)) +
+    geom_histogram(color = "black", fill = "grey") +
+    facet_wrap(~Parameter, nrow = 2, scales = "free") +
+    ggthemes::theme_few(base_size = 12) +
+    labs(x = "Parameter estimate", y = "Posterior density") +
+    ggtitle(doArea)
+   
+   print(p)
+   
+   # table of posterior summaries
+   postSummary <- tmpDf %>%
+     group_by(Parameter) %>%
+     summarise(Mean = mean(value),
+               Median = median(value),
+               SD = sd(value),
+               `2.5%` = quantile(value, 0.025),
+               `97.5%` = quantile(value, 0.975)) %>%
+     dplyr::select(-Parameter) %>%
+     as.data.frame()
+   rownames(postSummary) <- tableLabs
+     
+   
+   print(knitr::kable(postSummary, digits = 2))
+   cat("\n")
+}
+```
+
+
+
+<!-- # Temporal random effects -->
+
+```{r temporals, eval = FALSE}
+allGammas <- tibble()
+for(doSite in subDirs) {
+  tmp <- mcmcList[[doSite]]
+  tmp <- as.data.frame(tmp) %>%
+     mutate(iteration = 1:n()) %>%
+     gather("parameter", "value", -iteration) %>%
+     filter(grepl("gamma", parameter)) %>%
+     group_by(parameter) %>%
+     summarise(Mean = mean(value),
+               Lower95 = quantile(value, 0.025),
+               Upper95 = quantile(value, 0.975),
+               .groups = "drop") %>%
+     mutate(Site = doSite)
+  allGammas <- bind_rows(allGammas, tmp)
+}
+
+allGammas <- allGammas %>%
+   separate(parameter, into = c("out", "tmp"), sep = "\\[") %>%
+   separate(tmp, into = c("yearid", "out2"), sep = "\\]") %>%
+   dplyr::select(-out, -out2) %>%
+   mutate(yearid = as.numeric(yearid) + 1985) %>%
+   mutate(yearid = ifelse(yearid > 2012, yearid + 1, yearid)) %>%
+   mutate(Site = ifelse(Site == "NLar", "North Laramie", Site))
+
+ggplot(allGammas, aes(x = yearid)) +
+   geom_ribbon(aes(ymin = Lower95, ymax = Upper95), alpha = 0.2) +
+   geom_line(aes(y = Mean)) +
+   geom_point(aes(y = Mean)) +
+   geom_hline(aes(yintercept = 0), linetype = 2) +
+   ggthemes::theme_few() +
+   labs(x = "Year", y = "Intercept offset") +
+   facet_wrap(~Site, scales = "free_y") +
+   scale_x_continuous(breaks = seq(min(allGammas$yearid), max(allGammas$yearid), by = 2)) +
+   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
+
+# Nesting and summer cover thresholds
+
+```{r targs,  eval = TRUE, results = 'asis'}
+read.csv("../AuxData/CoreAreaNamesMapping.csv") %>%
+  dplyr::select(Name, Abbreviation, Region, NestingTarget, SummerTarget) %>%
+  knitr::kable() %>%
+  print()
+
+```

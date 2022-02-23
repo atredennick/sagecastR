@@ -1,0 +1,107 @@
+\begin{table}[tbp]
+\caption{\label{tab:priors}Prior distributions for the dynamic-additive spatiotemporal regression model of sagebrush cover.}
+\small
+\begin{tabular}{p{0.1\linewidth}p{0.35\linewidth}p{0.2\linewidth}p{0.2\linewidth}}
+\hline
+Parameter & Definition & Distribution & Source \\ \hline
+$\beta_1$ & intercept  & Normal(0.73, 1) & Tredennick et al. (2016) \\
+$\beta_2$ & density-dependence & Normal(0.72, 1) & Tredennick et al. (2016) \\
+$\beta_{3\&4}$ & effects of precipitation ($\beta_3$) and temperature ($\beta_4$) & Normal(0, 5) & --  \\
+$\bm{\gamma}$ & temporal random effects & Normal(0, $\sigma_{\gamma}$) & -- \\
+$\sigma_{\gamma}$ & standard deviation of temporal random effects & Cauchy(0, 2.5) & -- \\ \hline
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}
+
+\caption{\label{tab:gcms}Averages and variances of climate covariates over different time periods. Averages are average values over the core areas. Core area values were the weighted averages according to GCM weights. Variances are average variances over the core areas. Core area variances were computed over the weighted averages of values for each core area.}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}[t]{llrrrr}
+\toprule
+GCM Scenario & Time Period & Avg. Precip. (mm) & Var. Precip. & Avg. Temp. (deg. C) & Var. Temp.\\
+\midrule
+historical & Historical & 2.027 & 0.007 & 11.483 & 0.456\\
+ssp126 & 2020 - 2040 & 2.215 & 0.016 & 13.391 & 0.088\\
+ssp126 & 2040 - 2060 & 2.276 & 0.016 & 13.989 & 0.080\\
+ssp126 & 2060 - 2080 & 2.266 & 0.026 & 14.367 & 0.069\\
+ssp126 & 2080 - 2100 & 2.280 & 0.013 & 14.020 & 0.089\\
+ssp245 & 2020 - 2040 & 2.154 & 0.012 & 13.157 & 0.112\\
+ssp245 & 2040 - 2060 & 2.229 & 0.019 & 14.070 & 0.236\\
+ssp245 & 2060 - 2080 & 2.254 & 0.020 & 14.943 & 0.076\\
+ssp245 & 2080 - 2100 & 2.267 & 0.023 & 15.419 & 0.041\\
+ssp585 & 2020 - 2040 & 2.149 & 0.016 & 13.521 & 0.247\\
+ssp585 & 2040 - 2060 & 2.202 & 0.012 & 14.920 & 0.430\\
+ssp585 & 2060 - 2080 & 2.266 & 0.019 & 16.699 & 0.230\\
+ssp585 & 2080 - 2100 & 2.284 & 0.018 & 18.014 & 0.229\\
+\bottomrule
+\end{tabular}}
+\end{table}
+\efloatseparator
+ 
+\begin{table}
+
+\caption{\label{tab:colonization}Results from colonization model for each core area. Pr(colonize | cover = 0) reads, 'the probability of colonizition given that current cover is zero.'}
+\centering
+\begin{tabular}[t]{lrr}
+\toprule
+Core area & Pr(colonize | cover = 0) & Mean cover in colonized cells\\
+\midrule
+Bear River & 0.35 & 3\\
+Blacks Fork & 0.14 & 2\\
+Buffalo & 0.35 & 2\\
+Continental Divide & 0.22 & 2\\
+Crowheart & 0.21 & 2\\
+Daniel & 0.22 & 2\\
+Douglas & 0.37 & 2\\
+Elk Basin East & 0.42 & 2\\
+Fontenelle & 0.17 & 2\\
+Grass Creek & 0.15 & 2\\
+Greater South Pass 1 & 0.17 & 2\\
+Greater South Pass 2 & 0.14 & 2\\
+Greater South Pass 3 & 0.18 & 2\\
+Greater South Pass 4 & 0.23 & 2\\
+Greater South Pass 5 & 0.13 & 2\\
+Hanna & 0.21 & 2\\
+Heart Mountain & 0.31 & 2\\
+Hyattville & 0.18 & 2\\
+Jackson & 0.42 & 4\\
+Little Mountain & 0.43 & 3\\
+Natrona 1 & 0.21 & 2\\
+Natrona 2 & 0.30 & 2\\
+Natrona 3 & 0.19 & 2\\
+Newcastle & 0.19 & 2\\
+North Gillette & 0.17 & 2\\
+North Glenrock & 0.28 & 3\\
+North Laramie & 0.38 & 3\\
+Oregon Basin & 0.19 & 2\\
+Salt Wells & 0.20 & 2\\
+Shell & 0.19 & 2\\
+South Rawlins & 0.39 & 3\\
+Thermopolis & 0.26 & 3\\
+Thunder Basin & 0.24 & 2\\
+Washakie & 0.36 & 3\\
+\bottomrule
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}
+
+\caption{\label{tab:lassos}LASSO-penalized coefficient values for the selected model for classifying temperature sensitivity. Note that all predictor values were averaged over grid cells within a core area and then averaged over depth from surface. The 'alpha' covariate is: 'scale parameter inversely proportional to mean pore diameter'. Standard errors, confidence intervals, and/or p-values are not reported because these metrics are not yet available for penalized regression under frequentist framework.}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}[t]{lr}
+\toprule
+Soil property & LASSO-penalized coefficient value\\
+\midrule
+95th percentile of alpha & 0.15\\
+95th percentile of clay percentage & 0.34\\
+5th percentile of saturated hydraulic conductivity & 0.20\\
+5th percentile of organic matter & 0.30\\
+5th percentile of sand percentage & 0.22\\
+95th percentile of sand percentage & 0.48\\
+\bottomrule
+\end{tabular}}
+\end{table}
